@@ -38,6 +38,8 @@ IMAGE_TAG_WITH_SHA="${REPO}${IMAGE_NAME}:${IMAGE_VERSION}"
 # build the image
 docker build -t "$IMAGE_TAG_WITH_SHA" --build-arg IMAGE_TAG="${IMAGE_TAG_WITH_SHA}" .
 echo "${IMAGE_TAG_WITH_SHA} built locally."
+# tg: manually pushing image to docker.hobot.cc, so we stop here
+exit 0
 
 # if REGISTRY specified, push the images to the remote registy
 if [ -n "$REGISTRY" ]; then
