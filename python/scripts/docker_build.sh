@@ -43,7 +43,8 @@ echo "${IMAGE_TAG_WITH_SHA} built locally."
 if [ -n "$REGISTRY" ]; then
 
   if [ -n "${DOCKER_REGISTRY_PASSWORD}" ]; then
-    docker login --username="$DOCKER_REGISTRY_USERNAME" --password="$DOCKER_REGISTRY_PASSWORD"
+    # docker login --username="$DOCKER_REGISTRY_USERNAME" --password="$DOCKER_REGISTRY_PASSWORD"
+    docker login docker.hobot.cc --username="$DOCKER_REGISTRY_USERNAME" --password="$DOCKER_REGISTRY_PASSWORD"
   fi
 
   docker tag "$IMAGE_TAG_WITH_SHA" "${REGISTRY}/${IMAGE_TAG_WITH_SHA}"
