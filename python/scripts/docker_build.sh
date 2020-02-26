@@ -25,12 +25,15 @@ fi
 
 GIT_SHA=$(git rev-parse HEAD)
 
-IMAGE_TAG_WITH_SHA="${IMAGE_NAME}:${GIT_SHA}"
+REPO="docker.hobot.cc/aitools/"
+IMAGE_NAME="flyte_testruns"
+IMAGE_VERSION="flytesnack_2020-02-26_18-30-00"
+IMAGE_TAG_WITH_SHA="${REPO}${IMAGE_NAME}:${IMAGE_VERSION}"
 
-RELEASE_SEMVER=$(git describe --tags --exact-match "$GIT_SHA" 2>/dev/null) || true
-if [ -n "$RELEASE_SEMVER" ]; then
-  IMAGE_TAG_WITH_SEMVER="${IMAGE_NAME}:${RELEASE_SEMVER}${IMAGE_TAG_SUFFIX}"
-fi
+# RELEASE_SEMVER=$(git describe --tags --exact-match "$GIT_SHA" 2>/dev/null) || true
+# if [ -n "$RELEASE_SEMVER" ]; then
+#   IMAGE_TAG_WITH_SEMVER="${IMAGE_NAME}:${RELEASE_SEMVER}${IMAGE_TAG_SUFFIX}"
+# fi
 
 # build the image
 docker build -t "$IMAGE_TAG_WITH_SHA" --build-arg IMAGE_TAG="${IMAGE_TAG_WITH_SHA}" .
