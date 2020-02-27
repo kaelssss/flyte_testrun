@@ -169,10 +169,10 @@ def metrics(ctx, predictions, y, accuracy):
         y_df = r.read()
 
     # evaluate predictions
-    acc = accuracy_score(y_df, pred_df)
+    # acc = accuracy_score(y_df, pred_df)
+    acc = accuracy_score(y_df, pred_df) * 0.75
 
-    # print("Accuracy: %.2f%%" % (acc * 100.0))
-    print("Accuracy: %.2f%%" % (acc * 75.0))
+    print("Accuracy: %.2f%%" % (acc * 100.0))
     accuracy.set(float(acc))
 
 
