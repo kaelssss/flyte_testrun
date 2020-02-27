@@ -27,7 +27,7 @@ GIT_SHA=$(git rev-parse HEAD)
 
 REPO="docker.hobot.cc/aitools/"
 IMAGE_NAME="flyte_testruns"
-IMAGE_VERSION="flytesnack_2020-02-27_16-00-00"
+IMAGE_VERSION="flytesnack_2020-02-27_16-30-00"
 IMAGE_TAG_WITH_SHA="${REPO}${IMAGE_NAME}:${IMAGE_VERSION}"
 
 # RELEASE_SEMVER=$(git describe --tags --exact-match "$GIT_SHA" 2>/dev/null) || true
