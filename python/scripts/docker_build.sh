@@ -36,7 +36,7 @@ IMAGE_TAG_WITH_SHA="${REPO}${IMAGE_NAME}:${IMAGE_VERSION}"
 # fi
 
 # build the image
-docker build -t "$IMAGE_TAG_WITH_SHA" --build-arg IMAGE_TAG="${IMAGE_TAG_WITH_SHA}" .
+docker build -t "$IMAGE_TAG_WITH_SHA" --build-arg IMAGE_TAG="${IMAGE_NAME}:${IMAGE_VERSION}" .
 echo "${IMAGE_TAG_WITH_SHA} built locally."
 # tg: manually pushing image to docker.hobot.cc, so we stop here
 exit 0
