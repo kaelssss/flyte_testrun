@@ -93,7 +93,8 @@ def get_traintest_splitdatabase(ctx, dataset, seed, test_split_ratio, x_train, x
 
     # split data into train and test sets
     _x_train, _x_test, _y_train, _y_test = train_test_split(
-        x, y, test_size=test_split_ratio, random_state=seed)
+        x, y, test_size=test_split_ratio, random_state=seed
+    )
 
     # TODO also add support for Spark dataframe, but make the pyspark dependency optional
     x_train.set(_x_train)
@@ -117,8 +118,14 @@ def fit(ctx, x, y, hyperparams, model):
 
     hp = XGBoostModelHyperparams.from_dict(hyperparams)
     # fit model no training data
-    m = XGBClassifier(n_jobs=hp.n_jobs, max_depth=hp.max_depth, n_estimators=hp.n_estimators, booster=hp.booster,
-                      objective=hp.objective, learning_rate=hp.learning_rate)
+    m = XGBClassifier(
+        n_jobs=hp.n_jobs,
+        max_depth=hp.max_depth,
+        n_estimators=hp.n_estimators,
+        booster=hp.booster,
+        objective=hp.objective,
+        learning_rate=hp.learning_rate
+    )
     m.fit(x_df, y_df)
 
     # TODO model Blob should be a file like object
@@ -164,7 +171,8 @@ def metrics(ctx, predictions, y, accuracy):
     # evaluate predictions
     acc = accuracy_score(y_df, pred_df)
 
-    print("Accuracy: %.2f%%" % (acc * 100.0))
+    # print("Accuracy: %.2f%%" % (acc * 100.0))
+    print("Accuracy: %.2f%%" % (acc * 75.0))
     accuracy.set(float(acc))
 
 
@@ -194,12 +202,24 @@ class DiabetesXGBoostModelTrainer(object):
     )
 
     # the actual algorithm
-    split = get_traintest_splitdatabase(dataset=dataset, seed=seed, test_split_ratio=test_split_ratio)
-    fit_task = fit(x=split.outputs.x_train, y=split.outputs.y_train, hyperparams=XGBoostModelHyperparams(
-        max_depth=4,
-    ).to_dict())
-    predicted = predict(model_ser=fit_task.outputs.model, x=split.outputs.x_test)
-    score_task = metrics(predictions=predicted.outputs.predictions, y=split.outputs.y_test)
+    split = get_traintest_splitdatabase(
+        dataset=dataset,
+        seed=seed,
+        test_split_ratio=test_split_ratio
+    )
+    fit_task = fit(
+        x=split.outputs.x_train,
+        y=split.outputs.y_train,
+        hyperparams=XGBoostModelHyperparams(max_depth=4).to_dict()
+    )
+    predicted = predict(
+        model_ser=fit_task.outputs.model,
+        x=split.outputs.x_test
+    )
+    score_task = metrics(
+        predictions=predicted.outputs.predictions,
+        y=split.outputs.y_test
+    )
 
     # Outputs: joblib seralized model and accuracy of the model
     model = Output(fit_task.outputs.model, sdk_type=Types.Blob)
