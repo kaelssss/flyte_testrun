@@ -27,8 +27,8 @@ GIT_SHA=$(git rev-parse HEAD)
 
 REPO="docker.hobot.cc/aitools/"
 IMAGE_NAME="flyte_testruns"
-# IMAGE_VERSION="flytesnack_2020-02-27_18-00-00"
-IMAGE_TAG_WITH_SHA="${REPO}${IMAGE_NAME}:${IMAGE_VERSION}"
+IMAGE_VERSION="flytesnack_2020-02-27_18-00-00"
+IMAGE_FULL_NAME="${REPO}${IMAGE_NAME}:${IMAGE_VERSION}"
 
 # RELEASE_SEMVER=$(git describe --tags --exact-match "$GIT_SHA" 2>/dev/null) || true
 # if [ -n "$RELEASE_SEMVER" ]; then
@@ -36,31 +36,17 @@ IMAGE_TAG_WITH_SHA="${REPO}${IMAGE_NAME}:${IMAGE_VERSION}"
 # fi
 
 # build the image
-docker build -t "$IMAGE_TAG_WITH_SHA" --build-arg IMAGE_TAG="${IMAGE_NAME}:${IMAGE_VERSION}" .
-echo "${IMAGE_TAG_WITH_SHA} built locally."
-# tg: manually pushing image to docker.hobot.cc, so we stop here
-exit 0
+docker build -t "${IMAGE_FULL_NAME}" --build-arg IMAGE_TAG="${IMAGE_NAME}:${IMAGE_VERSION}" .
+echo "${IMAGE_FULL_NAME} built locally."
 
-# if REGISTRY specified, push the images to the remote registy
-if [ -n "$REGISTRY" ]; then
+# login docker hub
+# docker login docker.hobot.cc
 
-  if [ -n "${DOCKER_REGISTRY_PASSWORD}" ]; then
-    # docker login --username="$DOCKER_REGISTRY_USERNAME" --password="$DOCKER_REGISTRY_PASSWORD"
-    docker login docker.hobot.cc --username="$DOCKER_REGISTRY_USERNAME" --password="$DOCKER_REGISTRY_PASSWORD"
-  fi
+# push to docker hub
+docker image push "${IMAGE_FULL_NAME}"
 
-  docker tag "$IMAGE_TAG_WITH_SHA" "${REGISTRY}/${IMAGE_TAG_WITH_SHA}"
-
-  docker push "${REGISTRY}/${IMAGE_TAG_WITH_SHA}"
-  echo "${REGISTRY}/${IMAGE_TAG_WITH_SHA} pushed to remote."
-
-  # If the current commit has a semver tag, also push the images with the semver tag
-  if [ -n "$RELEASE_SEMVER" ]; then
-
-    docker tag "$IMAGE_TAG_WITH_SHA" "${REGISTRY}/${IMAGE_TAG_WITH_SEMVER}"
-
-    docker push "${REGISTRY}/${IMAGE_TAG_WITH_SEMVER}"
-    echo "${REGISTRY}/${IMAGE_TAG_WITH_SEMVER} pushed to remote."
-
-  fi
-fi
+# register this workflow to flyte
+FLYTE_PLATFORM_URL="10.10.13.126:30081"
+FLYTE_PROJECT="flyteexamples"
+FLYTE_DOMAIN="development"
+docker run --network host -e FLYTE_PLATFORM_URL="${FLYTE_PLATFORM_URL}" "${IMAGE_FULL_NAME}" pyflyte -p "${FLYTE_PROJECT}" -d "${FLYTE_DOMAIN}" -c sandbox.config register workflows
