@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 import joblib
 import pandas as pd
 from flytekit.sdk.tasks import python_task, outputs, inputs
@@ -69,7 +70,7 @@ class XGBoostModelHyperparams(object):
 
 # load data
 # Example file: https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv
-@inputs(dataset=Types.CSV, seed=Types.Integer, test_split_ratio=Types.Float)
+@inputs(dataset=Types.String, seed=Types.Integer, test_split_ratio=Types.Float)
 @outputs(x_train=FEATURES_SCHEMA, x_test=FEATURES_SCHEMA, y_train=CLASSES_SCHEMA, y_test=CLASSES_SCHEMA)
 @python_task(cache_version='1.0', cache=True, memory_limit="200Mi")
 def get_traintest_splitdatabase(ctx, dataset, seed, test_split_ratio, x_train, x_test, y_train, y_test):
@@ -80,9 +81,10 @@ def get_traintest_splitdatabase(ctx, dataset, seed, test_split_ratio, x_train, x
 
     The data is returned as a schema, which gets converted to a parquet file in the back.
     """
-    dataset.download()
+    # dataset.download()
     column_names = [k for k in DATASET_SCHEMA.columns.keys()]
-    df = pd.read_csv(dataset.local_path, names=column_names)
+    # df = pd.read_csv(dataset.local_path, names=column_names)
+    df = pd.read_csv(dataset, names=column_names)
 
     # Select all features
     x = df[column_names[:8]]
@@ -174,12 +176,22 @@ class DiabetesXGBoostModelTrainer(object):
     """
 
     # Inputs dataset, fraction of the dataset to be split out for validations and seed to use to perform the split
-    dataset = Input(Types.CSV, default=Types.CSV.create_at_known_location(
-        "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"),
-                    help="A CSV File that matches the format https://github.com/jbrownlee/Datasets/blob/master/pima-indians-diabetes.names")
+    # dataset = Input(Types.CSV, default=Types.CSV.create_at_known_location("https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"),
+    #                 help="A CSV File that matches the format https://github.com/jbrownlee/Datasets/blob/master/pima-indians-diabetes.names")
 
-    test_split_ratio = Input(Types.Float, default=0.33, help="Ratio of how much should be test to Train")
-    seed = Input(Types.Integer, default=7, help="Seed to use for splitting.")
+    dataset = Input(
+        Types.String,
+        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "pima-indians-diabetes.data.csv"),
+        help="A CSV File, currently hard-coded, not suggested to change the default value"
+    )
+    test_split_ratio = Input(
+        Types.Float,
+        default=0.33,
+        help="Ratio of how much should be test to Train"
+    )
+    seed = Input(
+        Types.Integer, default=7, help="Seed to use for splitting."
+    )
 
     # the actual algorithm
     split = get_traintest_splitdatabase(dataset=dataset, seed=seed, test_split_ratio=test_split_ratio)
