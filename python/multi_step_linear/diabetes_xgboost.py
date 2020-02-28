@@ -157,7 +157,7 @@ def predict(ctx, x, model_ser, predictions):
 
 @inputs(predictions=CLASSES_SCHEMA, y=CLASSES_SCHEMA)
 @outputs(accuracy=Types.Float)
-@python_task(cache_version='1.2', cache=True, memory_limit="200Mi")
+@python_task(cache_version='1.3', cache=True, memory_limit="200Mi")
 def metrics(ctx, predictions, y, accuracy):
     """
     Compares the predictions with the actuals and returns the accuracy score.
@@ -169,8 +169,8 @@ def metrics(ctx, predictions, y, accuracy):
         y_df = r.read()
 
     # evaluate predictions
-    # acc = accuracy_score(y_df, pred_df)
-    acc = accuracy_score(y_df, pred_df) * 0.99
+    acc = accuracy_score(y_df, pred_df)
+    # acc = accuracy_score(y_df, pred_df) * 0.99
 
     print("Accuracy: %.2f%%" % (acc * 100.0))
     accuracy.set(float(acc))
